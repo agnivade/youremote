@@ -1,13 +1,17 @@
 {
-  "name": "mymaterial",
+  "name": "youremote",
   "version": "1.0.0",
   "description": "This file is needed for webpack to generate the final file",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheFoodBox/Foodbox-HQ.git"
+  },
+  "author": "Agniva De Sarker",
+  "license": "MIT",
   "dependencies": {
     "material-ui": "^0.10.2",
     "react": "^0.13.3",
