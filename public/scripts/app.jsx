@@ -43,8 +43,7 @@ var Main = React.createClass({
       url: 'http://localhost:3000/get_queue',
       dataType: 'json',
       contentType: 'application/json',
-      success: function(data) {
-        var songs = data["queue"];
+      success: function(songs) {
         this.setState({data: songs});
       }.bind(this),
       error: function(jqxhr, textStatus, error) {

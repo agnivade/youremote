@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/Workiva/go-datastructures/queue"
 )
 
 type Song struct {
@@ -14,20 +17,11 @@ type Song struct {
 	Id          string `json:"id"`
 }
 
-type Queue struct {
+type JSONQueue struct {
 	Queue []Song `json:"queue"`
 }
 
-var queue = Queue{[]Song{
-	{"The second title",
-		"What a description",
-		"https://i.ytimg.com/vi/B7vFWy8NxIU/default.jpg",
-		"B7vFWy8NxIU"},
-	{"This is a title",
-		"What a description",
-		"https://i.ytimg.com/vi/G22X5X49VhM/default.jpg",
-		"G22X5X49VhM"},
-}}
+var songQueue = queue.New(100)
 
 func main() {
 	port := os.Getenv("PORT")
@@ -42,14 +36,33 @@ func main() {
 	http.HandleFunc("/get_queue", get_queue)
 	http.HandleFunc("/push_data", push_data)
 
+	//Starting the goroutine which will loop over songs
+	go loopSongs()
+
 	log.Println("Server started: http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func get_queue(w http.ResponseWriter, r *http.Request) {
 	log.Println("Get queue called")
-	json_response, err := json.Marshal(queue)
+
+	song_items, err := songQueue.Get(songQueue.Len())
 	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = songQueue.Put(song_items)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json_response, err := json.Marshal(song_items)
+	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -62,11 +75,33 @@ func get_queue(w http.ResponseWriter, r *http.Request) {
 func push_data(w http.ResponseWriter, r *http.Request) {
 	log.Println("Push data called")
 	decoder := json.NewDecoder(r.Body)
-	var new_songs Queue
+	var new_songs JSONQueue
+	// Decoding the json into a struct
 	err := decoder.Decode(&new_songs)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	// Pushing the songs to the queue
+	err = songQueue.Put(new_songs.Queue)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	log.Println(new_songs)
+	// Sending the response
 	w.Write([]byte("success"))
+}
+
+func loopSongs() {
+	for {
+		time.Sleep(2 * time.Second)
+		// check if song is already playing
+		// if yes, sleep
+		// if not, then get the top item from queue and start playing it and store the pid
+		// continue
+	}
 }
