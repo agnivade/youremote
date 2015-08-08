@@ -33,9 +33,25 @@ var Main = React.createClass({
     this.syncFromServer();
     setInterval(this.syncFromServer, 10000);
   },
+  getInitialState: function() {
+    return {data: []};
+  },
   // This call gets the queue from the server and renders it
   syncFromServer: function() {
     console.log("sync server called");
+    $.ajax({
+      url: 'http://localhost:3000/get_queue',
+      dataType: 'json',
+      contentType: 'application/json',
+      success: function(data) {
+        var songs = data["queue"];
+        this.setState({data: songs});
+      }.bind(this),
+      error: function(jqxhr, textStatus, error) {
+        var err_msg = textStatus + ", " + jqxhr.responseText;
+        console.error("Get server queue failed: " + err_msg);
+      }
+    });
   },
   openDialog: function() {
     console.log("Add button is clicked");
@@ -87,7 +103,21 @@ var Main = React.createClass({
   },
   pushToServer: function(dataToPush) {
     console.log("pushing to server");
-    this.syncFromServer();
+    $.ajax({
+      url: 'http://localhost:3000/push_data',
+      method: 'POST',
+      data: JSON.stringify({"queue": dataToPush}),
+      dataType: 'text',
+      contentType: 'application/json',
+      success: function(data) {
+        console.log(data);
+        this.syncFromServer();
+      }.bind(this),
+      error: function(jqxhr, textStatus, error) {
+        var err_msg = textStatus + ", " + jqxhr.responseText;
+        console.error("Get server queue failed: " + err_msg);
+      }
+    });
   },
   dismissDialog: function() {
     this.refs.addVideoDialog.dismiss();
@@ -97,10 +127,6 @@ var Main = React.createClass({
   var appBarStyle = {
     position: 'fixed',
     top: '0'
-  };
-  var listStyle = {
-    background: 'none',
-    marginTop: '10'
   };
   var actionButtonStyle = {
     position: 'fixed',
@@ -115,33 +141,10 @@ var Main = React.createClass({
     { text: 'Add', onClick: this.addVideo, ref: 'add' }
   ];
    return (
-         <div className="main">
+          <div className="main">
+          <AppBar title="Welcome" zDepth={1} style={appBarStyle} />
 
-         <AppBar title="Welcome" zDepth={1} style={appBarStyle} />
-
-          <List subheader="Song Queue" style={listStyle}>
-            <ListItem
-              leftAvatar={<Avatar src="http://img.youtube.com/vi/qcOiJnWniWg/1.jpg" />}
-              primaryText="Brendan Lim"
-              secondaryText={
-                <p>
-                  <span style={{color: Colors.darkBlack}}>Brunch this weekend?</span><br/>
-                  I&apos;ll be in your neighborhood doing errands this weekend. Do you want to grab brunch?
-                </p>
-              }
-              secondaryTextLines={2} />
-            <ListDivider inset={true} />
-            <ListItem
-              leftAvatar={<Avatar src="http://img.youtube.com/vi/x1NAhlVRaZ4/1.jpg" />}
-              primaryText="Hey there, this is my Primary Text"
-              secondaryText={
-                <p>
-                  Do whatever you want, I don't want your secondary Text
-                </p>
-              }
-              secondaryTextLines={2} />
-            <ListDivider inset={true} />
-          </List>
+          <SongList data={this.state.data} />
 
           <FloatingActionButton onClick={this.openDialog} style={actionButtonStyle}>
           <FontIcon className="material-icons">add</FontIcon>
@@ -159,6 +162,34 @@ var Main = React.createClass({
           </Dialog>
           </div>
           );
+  }
+});
+
+var SongList = React.createClass({
+  render: function() {
+    var listStyle = {
+      background: 'none',
+      marginTop: '60'
+    };
+    var listNodes = this.props.data.map(function (song) {
+        return (
+          <div>
+          <ListItem
+            leftAvatar={<Avatar src={song.thumbnail} />}
+            primaryText={song.title}
+            secondaryText={song.description}
+            secondaryTextLines={2} />
+          <ListDivider inset={true} />
+          </div>
+        );
+      });
+    return (
+      <div>
+      <List style={listStyle}>
+        {listNodes}
+      </List>
+      </div>
+    );
   }
 });
 
