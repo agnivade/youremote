@@ -19,6 +19,7 @@ var ListDivider = Mui.ListDivider;
 var Avatar = Mui.Avatar;
 var FloatingActionButton = Mui.FloatingActionButton;
 var ToggleStar = Mui.ToggleStar;
+var FontIcon = Mui.FontIcon;
 
 var Main = React.createClass({
   childContextTypes: {
@@ -40,7 +41,9 @@ var Main = React.createClass({
     };
      return (
            <div className="main">
+
            <AppBar title="Welcome" zDepth={1} style={appBarStyle} />
+
             <List subheader="Song Queue" style={listStyle}>
               <ListItem
                 leftAvatar={<Avatar src="http://img.youtube.com/vi/qcOiJnWniWg/1.jpg" />}
@@ -64,7 +67,10 @@ var Main = React.createClass({
                 secondaryTextLines={2} />
               <ListDivider inset={true} />
             </List>
-            <FloatingActionButton iconClassName="muidocs-icon-content-add-circle"/>
+
+            <FloatingActionButton>
+            <FontIcon className="material-icons">add</FontIcon>
+            </FloatingActionButton>
             </div>
             );
   }
