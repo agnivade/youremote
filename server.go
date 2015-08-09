@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/Workiva/go-datastructures/queue"
@@ -46,6 +48,8 @@ func main() {
 func get_queue(w http.ResponseWriter, r *http.Request) {
 	log.Println("Get queue called")
 
+	log.Println("Length of queue is -", songQueue.Len())
+	// Retreiving all the songs
 	song_items, err := songQueue.Get(songQueue.Len())
 	if err != nil {
 		log.Println(err)
@@ -53,13 +57,21 @@ func get_queue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = songQueue.Put(song_items)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	// Putting them back again because I have no way to just read the
+	// songs without taking them from the queue
+	// XXX: There is only one race condition here- while doing this taking out
+	// and in operation, some other request might add other songs and this might
+	// change the song order in the queue
+	for _, song := range song_items {
+		err = songQueue.Put(song)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
+	// Converting the song queue to json and sending
 	json_response, err := json.Marshal(song_items)
 	if err != nil {
 		log.Println(err)
@@ -84,11 +96,13 @@ func push_data(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Pushing the songs to the queue
-	err = songQueue.Put(new_songs.Queue)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	for _, song := range new_songs.Queue {
+		err = songQueue.Put(song)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	log.Println(new_songs)
@@ -97,11 +111,41 @@ func push_data(w http.ResponseWriter, r *http.Request) {
 }
 
 func loopSongs() {
+	// a sample command to intialise the cmd variable
+	cmd := exec.Command("echo", "hello world")
+	cmd.Run()
+	// check if song is already playing
+	// if not, then get the top item from queue and start playing it
+	// if yes, sleep
+	// continue
 	for {
-		time.Sleep(2 * time.Second)
-		// check if song is already playing
-		// if yes, sleep
-		// if not, then get the top item from queue and start playing it and store the pid
-		// continue
+		if cmd.ProcessState.Exited() && songQueue.Len() > 0 {
+			// Getting the song
+			song_queue, err := songQueue.Get(1)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			song, ok := song_queue[0].(Song)
+			if !ok {
+				log.Println("Conversion from interface to struct failed")
+				break
+			}
+			log.Println(song.Id)
+			// Constructing the video url
+			video_url := "https://www.youtube.com/watch?v=" + song.Id
+			cmd = exec.Command("mpsyt", "playurl", video_url)
+			randomBytes := &bytes.Buffer{}
+			cmd.Stdout = randomBytes
+
+			// Start command synchronously
+			err = cmd.Run()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+		} else {
+			time.Sleep(2 * time.Second)
+		}
 	}
 }

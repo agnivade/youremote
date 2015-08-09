@@ -176,7 +176,7 @@ var SongList = React.createClass({
           <ListItem
             leftAvatar={<Avatar src={song.thumbnail} />}
             primaryText={song.title}
-            secondaryText={song.description}
+            secondaryText={<span style={{color: Colors.teal100}}>{song.description}</span>}
             secondaryTextLines={2} />
           <ListDivider inset={true} />
           </div>
