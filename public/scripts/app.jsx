@@ -172,7 +172,7 @@ var SongList = React.createClass({
     };
     var listNodes = this.props.data.map(function (song) {
         return (
-          <div>
+          <div className="list-item">
           <ListItem
             leftAvatar={<Avatar src={song.thumbnail} />}
             primaryText={song.title}
