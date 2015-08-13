@@ -101,7 +101,7 @@ var Main = React.createClass({
     }.bind(this));
   },
   pushToServer: function(dataToPush) {
-    console.log("pushing to server");
+    console.log("pushing to server - " + JSON.stringify(dataToPush));
     $.ajax({
       url: 'http://localhost:3000/push_data',
       method: 'POST',

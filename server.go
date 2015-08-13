@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -23,9 +22,13 @@ type JSONQueue struct {
 	Queue []Song `json:"queue"`
 }
 
+// This is the queue that will hold all the songs in memory
 var songQueue = queue.New(100)
 
 func main() {
+	// Setting the log flags
+	log.SetFlags(log.Ltime | log.Lshortfile)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3000"
@@ -111,15 +114,13 @@ func push_data(w http.ResponseWriter, r *http.Request) {
 }
 
 func loopSongs() {
-	// a sample command to intialise the cmd variable
-	cmd := exec.Command("echo", "hello world")
-	cmd.Run()
-	// check if song is already playing
+	// check if song is already playing (XXX: This is no longer needed
+	// because we are playing the songs synchronously)
 	// if not, then get the top item from queue and start playing it
 	// if yes, sleep
-	// continue
+	// loop
 	for {
-		if cmd.ProcessState.Exited() && songQueue.Len() > 0 {
+		if songQueue.Len() > 0 {
 			// Getting the song
 			song_queue, err := songQueue.Get(1)
 			if err != nil {
@@ -134,11 +135,12 @@ func loopSongs() {
 			log.Println(song.Id)
 			// Constructing the video url
 			video_url := "https://www.youtube.com/watch?v=" + song.Id
-			cmd = exec.Command("mpsyt", "playurl", video_url)
-			randomBytes := &bytes.Buffer{}
-			cmd.Stdout = randomBytes
+			log.Println(video_url)
+			cmd := exec.Command("mpsyt", "playurl", video_url)
 
 			// Start command synchronously
+			// XXX: This will work for now but need to change it when we move over
+			// to raspberry pi
 			err = cmd.Run()
 			if err != nil {
 				log.Println(err)
