@@ -3,3 +3,19 @@ body {
   background-color: rgb(48, 48, 48);
 }
 
+.main h1 {
+  font-size: 30px !important;
+}
+
+.list-item div[data-reactid=".0.1.0.1:0.0.0.$touchRipple.1.$primaryText"] {
+  font-size: 20px !important;
+}
+
+.list-item span[data-reactid=".0.1.0.1:0.0.0.$touchRipple.1.$secondaryText"] {
+  font-size: 15px !important;
+}
+
+.main button[data-reactid=".0.2.0"] {
+  height: 70px !important;
+  width: 70px !important;
+}

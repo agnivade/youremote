@@ -40,7 +40,7 @@ var Main = React.createClass({
   syncFromServer: function() {
     console.log("sync server called");
     $.ajax({
-      url: 'http://localhost:3000/get_queue',
+      url: 'http://192.168.1.106:3000/get_queue',
       dataType: 'json',
       contentType: 'application/json',
       success: function(songs) {
@@ -103,7 +103,7 @@ var Main = React.createClass({
   pushToServer: function(dataToPush) {
     console.log("pushing to server - " + JSON.stringify(dataToPush));
     $.ajax({
-      url: 'http://localhost:3000/push_data',
+      url: 'http://192.168.1.106:3000/push_data',
       method: 'POST',
       data: JSON.stringify({"queue": dataToPush}),
       dataType: 'text',
