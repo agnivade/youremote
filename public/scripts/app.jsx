@@ -31,7 +31,7 @@ var Main = React.createClass({
   componentDidMount: function() {
     // Syncing the play queue from the server
     this.syncFromServer();
-    setInterval(this.syncFromServer, 10000);
+    setInterval(this.syncFromServer, 2000);
   },
   getInitialState: function() {
     return {data: []};
@@ -56,15 +56,17 @@ var Main = React.createClass({
     console.log("Add button is clicked");
     this.refs.addVideoDialog.show();
   },
-  getParameterByName: function(name, videoURL) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(videoURL);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  },
   addVideo: function() {
     var videoURL = this.refs.videoURL.getValue();
-    var videoID = this.getParameterByName('v', '?' + videoURL.split('?')[1]);
+    if (videoURL.indexOf("youtu.be") != -1) {
+      // get the video id in a different way if the url is shortened
+      var videoID = videoURL.split("youtu.be/")[1];
+    } else {
+      var name = 'v';
+      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec('?' + videoURL.split('?')[1]));
+      var videoID = results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
     console.log("Video was added- " + videoURL);
     var youtubeURL = 'https://www.googleapis.com/youtube/v3/videos?id='+videoID+'&key='+apiKey+'&part=snippet,statistics&fields=items(id,snippet(title,description,thumbnails),statistics)'
     $.ajax({

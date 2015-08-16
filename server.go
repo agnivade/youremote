@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -137,15 +139,36 @@ func loopSongs() {
 			video_url := "https://www.youtube.com/watch?v=" + song.Id
 			log.Println(video_url)
 			cmd := exec.Command("mpsyt", "playurl", video_url)
+			cmdReader, err := cmd.StdoutPipe()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
+				os.Exit(1)
+			}
+
+			scanner := bufio.NewScanner(cmdReader)
+			go func() {
+				for scanner.Scan() {
+					fmt.Printf("song output %s\n", scanner.Text())
+				}
+			}()
 
 			// Start command synchronously
 			// XXX: This will work for now but need to change it when we move over
 			// to raspberry pi
-			err = cmd.Run()
+			log.Println("Starting to play")
+			err = cmd.Start()
 			if err != nil {
 				log.Println(err)
 				continue
 			}
+
+			err = cmd.Wait()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			log.Println("Song ended")
 		} else {
 			time.Sleep(2 * time.Second)
 		}
