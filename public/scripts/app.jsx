@@ -64,7 +64,7 @@ var Main = React.createClass({
     } else {
       var name = 'v';
       var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec('?' + videoURL.split('?')[1]));
+        results = regex.exec('?' + videoURL.split('?')[1]);
       var videoID = results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
     console.log("Video was added- " + videoURL);
@@ -167,6 +167,9 @@ var Main = React.createClass({
 });
 
 var SongList = React.createClass({
+  propTypes : {
+    data: React.PropTypes.array
+  },
   render: function() {
     var listStyle = {
       background: 'none',
