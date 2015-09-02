@@ -116,8 +116,6 @@ func push_data(w http.ResponseWriter, r *http.Request) {
 }
 
 func loopSongs() {
-	// check if song is already playing (XXX: This is no longer needed
-	// because we are playing the songs synchronously)
 	// if not, then get the top item from queue and start playing it
 	// if yes, sleep
 	// loop
