@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/TheFoodBox/Foodbox-HQ.git"
+    "url": "git@github.com:agnivade/youremote.git"
   },
   "author": "Agniva De Sarker",
   "license": "MIT",
