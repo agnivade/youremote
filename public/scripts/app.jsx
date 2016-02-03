@@ -18,6 +18,7 @@ var ToggleStar = Mui.ToggleStar;
 var FontIcon = Mui.FontIcon;
 var Dialog = Mui.Dialog;
 var TextField = Mui.TextField;
+var FlatButton = Mui.FlatButton;
 
 var Main = React.createClass({
   childContextTypes: {
@@ -68,7 +69,10 @@ var Main = React.createClass({
       var videoID = results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
     console.log("Video was added- " + videoURL);
-    var youtubeURL = 'https://www.googleapis.com/youtube/v3/videos?id='+videoID+'&key='+apiKey+'&part=snippet,statistics&fields=items(id,snippet(title,description,thumbnails),statistics)'
+    var youtubeURL = 'https://www.googleapis.com/youtube/v3/videos?id='+videoID+'&key='+apiKey+'&part=snippet,statistics&fields=items(id,snippet(title,description,thumbnails),statistics)';
+    // Disabling the button on click, so that the user cannot click it
+    // again unless the response comes
+    this.refs.addBtn.disabled = true;
     $.ajax({
       url: youtubeURL,
       dataType: 'json',
@@ -99,6 +103,8 @@ var Main = React.createClass({
       }
     })
     .always(function(){
+      // Enabling back the button
+      this.refs.addBtn.disabled = false;
       this.dismissDialog();
     }.bind(this));
   },
@@ -138,8 +144,17 @@ var Main = React.createClass({
   };
   // The action buttons for the add button
   var standardActions = [
-    { text: 'Cancel', onClick: this.dismissDialog },
-    { text: 'Add', onClick: this.addVideo, ref: 'add' }
+      <FlatButton
+        label="Cancel"
+        secondary={true}
+        onClick={this.dismissDialog}
+      />,
+      <FlatButton
+        label="Add"
+        primary={true}
+        ref="addBtn"
+        onClick={this.addVideo}
+      />,
   ];
    return (
           <div className="main">
