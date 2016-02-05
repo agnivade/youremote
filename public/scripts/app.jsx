@@ -147,12 +147,14 @@ var Main = React.createClass({
       <FlatButton
         label="Cancel"
         secondary={true}
+        key="1"
         onClick={this.dismissDialog}
       />,
       <FlatButton
         label="Add"
         primary={true}
         ref="addBtn"
+        key="2"
         onClick={this.addVideo}
       />,
   ];
