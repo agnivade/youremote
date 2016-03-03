@@ -25,7 +25,11 @@ type JSONQueue struct {
 }
 
 // This is the queue that will hold all the songs in memory
-var songQueue = queue.New(100)
+var songQueue *queue.Queue
+
+func init() {
+	songQueue = queue.New(100)
+}
 
 func main() {
 	// Setting the log flags
